@@ -1,6 +1,6 @@
 {
   "name": "react-everscroll",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Performant large lists and infinite scrolling in React.",
   "main": "index.js",
   "dependencies": {
