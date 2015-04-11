@@ -5,6 +5,10 @@ Performant large lists and infinite scrolling in React.
 
 **Infinite Scrolling** becomes trivial, simply add new data to the index prop. Everscroll will invoke `onEndReached` prop so you know when to query for more data.
 
+## Dependencies
+Assumes use of Babel or similar tool for ES6 to 5 transpiling and JSX compilation
+Component also currently depends on Immutable and lodash though these could be removed with a little effort (pull request if interested)
+
 ## Usage
 ```js
 function renderRow(ID){
