@@ -1,0 +1,33 @@
+{
+  "name": "react-everscroll",
+  "version": "0.0.1",
+  "description": "Performant large lists and infinite scrolling in React.",
+  "main": "index.js",
+  "dependencies": {
+    "immutable": "^3.6.2",
+    "lodash": "^3.1.0"
+  },
+  "peerDependencies": {
+    "react": "0.12.x || >=0.13.0-beta.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gnoff/react-everscroll.git"
+  },
+  "keywords": [
+    "react",
+    "reactjs",
+    "infinite",
+    "everscroll"
+  ],
+  "bugs": {
+    "url": "https://github.com/gnoff/react-everscroll/issues"
+  },
+  "homepage": "https://github.com/gnoff/react-everscroll"
+}
