@@ -14,7 +14,17 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "gnoff <josh@root-two.com>",
+  "maintainers": [
+    {
+      "name": "gnoff",
+      "email": "josh@root-two.com"
+    },
+    {
+      "name": "rt2zz",
+      "email": "zack@root-two.com"
+    }
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
