@@ -135,28 +135,21 @@ var Everscroll = React.createClass({
    */
   _handleScroll: function(){
 
-    if (this.props.rowIndex.length < this.props.renderCount) return;
+    var {reverse, renderCount, rowIndex} = this.props
+    var {listOffset} = this.state
 
-    var reverse = this.props.reverse
+    if (rowIndex.length < renderCount) return;
 
     var cursorRef = this._calcCursorRef()
-    var renderRange = this._getRefRenderRange()
-    var refRange = this._getRefRange()
-
-    var rowsAbove = Math.abs(renderRange.first() - cursorRef)
-    var rowsBelow = Math.abs(cursorRef - renderRange.last())
-
-    var direction = rowsAbove >= rowsBelow ? 1 : -1;
-    direction = reverse ? direction * -1 : direction;
-    var offsetAdj = Math.floor(Math.abs(rowsAbove - rowsBelow) / 2) * direction
+    var impliedListOffset = (curorRef - renderCount / 2) | 0
 
     var minOffset = 0
-    var maxOffset = this.props.rowIndex.length - this.props.renderCount
+    var maxOffset = rowIndex.length - renderCount
 
-    var adjustedOffset = Math.min(Math.max(this.state.listOffset + offsetAdj, minOffset), maxOffset);
-    var adjustedKeyStart = (this.state.keyStart + this.state.listOffset - adjustedOffset) % this.props.renderCount
+    var adjustedOffset = Math.min(Math.max(impliedListOffset, minOffset), maxOffset);
+    var adjustedKeyStart = (this.state.keyStart + listOffset - adjustedOffset) % this.props.renderCount
 
-    if (adjustedOffset === maxOffset && this.state.listOffset !== adjustedOffset) {
+    if (adjustedOffset === maxOffset && listOffset !== adjustedOffset) {
       process.nextTick(this.props.onEndReached)
     }
 
@@ -164,11 +157,11 @@ var Everscroll = React.createClass({
     // consider caching rendered row heights rather than approximating
     var averageHeight = this.refs.renderRows.getDOMNode().scrollHeight / renderRange.count()
 
-    var shift = adjustedOffset - this.state.listOffset
-    var backSpacerHeight = (this.props.rowIndex.length - refRange.last() - 1 - shift) * averageHeight
+    var shift = adjustedOffset - listOffset
+    var backSpacerHeight = (rowIndex.length - refRange.last() - 1 - shift) * averageHeight
     var frontSpacerHeight = (refRange.first() + shift) * averageHeight
 
-    var [topSpacerHeight, bottomSpacerHeight] = this.props.reverse
+    var [topSpacerHeight, bottomSpacerHeight] = reverse
           ? [backSpacerHeight, frontSpacerHeight]
           : [frontSpacerHeight, backSpacerHeight]
 
