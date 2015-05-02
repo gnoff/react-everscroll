@@ -3,10 +3,6 @@ var React = require('react');
 var _ = require('lodash');
 var Immutable = require('immutable');
 
-console.debug = function(){
-  // console.log.apply(console, arguments)
-}
-
 var Everscroll = React.createClass({
 
   /**
@@ -130,40 +126,44 @@ var Everscroll = React.createClass({
     return this.props.renderRowHandler(ID, index);
   },
 
+  _onEndReached: function() {
+    setTimeout(this.props.onEndReached, 0)
+  },
+
   /**
    * determine if render range needs to shift and update state accordingly
    */
   _handleScroll: function(){
 
     var {reverse, renderCount, rowIndex} = this.props
-    var {listOffset} = this.state
+    var {listOffset, keyStart} = this.state
 
     if (rowIndex.length < renderCount) return;
 
     var cursorRef = this._calcCursorRef()
-    var impliedListOffset = (curorRef - renderCount / 2) | 0
+    var impliedListOffset = (cursorRef - renderCount / 2) | 0
 
     var minOffset = 0
-    var maxOffset = rowIndex.length - renderCount
+    var maxOffset = Math.max(0, rowIndex.length - renderCount)
 
     var adjustedOffset = Math.min(Math.max(impliedListOffset, minOffset), maxOffset);
-    var adjustedKeyStart = (this.state.keyStart + listOffset - adjustedOffset) % this.props.renderCount
+    var offsetShift = adjustedOffset - listOffset
+    var adjustedKeyStart = (keyStart + offsetShift) % renderCount
 
-    if (adjustedOffset === maxOffset && listOffset !== adjustedOffset) {
-      process.nextTick(this.props.onEndReached)
+    if (adjustedOffset === maxOffset && offsetShift > 0) {
+      this._onEndReached()
     }
+
+    var renderRange = this._getRefRenderRange();
+    var refRange = this._getRefRange();
 
     //@TODO come up with a better way seed top and bottom spacesrs and maintain consistency during the scroll
     // consider caching rendered row heights rather than approximating
     var averageHeight = this.refs.renderRows.getDOMNode().scrollHeight / renderRange.count()
 
     var shift = adjustedOffset - listOffset
-    var backSpacerHeight = (rowIndex.length - refRange.last() - 1 - shift) * averageHeight
-    var frontSpacerHeight = (refRange.first() + shift) * averageHeight
-
-    var [topSpacerHeight, bottomSpacerHeight] = reverse
-          ? [backSpacerHeight, frontSpacerHeight]
-          : [frontSpacerHeight, backSpacerHeight]
+    var backSpacerHeight = (rowIndex.length - refRange.last() - 1 - offsetShift) * averageHeight
+    var frontSpacerHeight = (refRange.first() + offsetShift) * averageHeight
 
     this.setState({
         cursorRef: cursorRef,
@@ -193,7 +193,7 @@ var Everscroll = React.createClass({
       },
       reverse: false,
       renderCount: 30,
-      throttle: 100,
+      throttle: 16,
       loadBuffer: 30,
       onEndReached: function () {}
     }
@@ -270,9 +270,7 @@ var Everscroll = React.createClass({
       var containerEl = this.getDOMNode()
       var refOffset = this._prependOffset || 0
       this._prependOffset = 0;
-      console.debug('CWU - cursorRef & refOffset', nextState.cursorRef, refOffset)
       this._targetCursorOffset = this.refs[nextState.cursorRef - refOffset].getDOMNode().offsetTop - containerEl.scrollTop
-      console.debug('CWU - _targetCursorOffset', this._targetCursorOffset)
     }
   },
 
@@ -282,9 +280,6 @@ var Everscroll = React.createClass({
       var containerEl = this.getDOMNode();
       var currentCursorOffset = this.refs[this.state.cursorRef].getDOMNode().offsetTop - containerEl.scrollTop
       var adjustment = currentCursorOffset - this._targetCursorOffset
-      console.debug('CDU - cursorRef', this.state.cursorRef)
-      console.debug('CDU - currentCursorOffset', currentCursorOffset)
-      console.debug('CDU - scrollTop adjustment', adjustment)
       containerEl.scrollTop += adjustment
     }
 
@@ -307,16 +302,18 @@ var Everscroll = React.createClass({
   },
 
   render: function() {
-    var reverse = this.props.reverse && true
+    var {reverse, frontCap, backCap} = this.props
+    var {backHeight, frontHeight} = this.state
 
     var refRange = this._getRefRange()
 
     var rows = this.props.rowIndex.slice(refRange.first(), refRange.last() + 1)
     var refs = this._getRefRenderRange().toArray()
-    var keys = this._getKeyList().map(val => "everrow-" + val).toArray()
+    var keys = this._getKeyList().map(val => "everscroll-" + val).toArray()
 
-    var topSpacerHeight = reverse ? this.state.backHeight : this.state.frontHeight;
-    var bottomSpacerHeight = reverse ? this.state.frontHeight : this.state.backHeight;
+    var [topSpacerHeight, bottomSpacerHeight] = reverse 
+      ? [backHeight, frontHeight]
+      : [frontHeight, backHeight]
 
     if (reverse) {
       rows.reverse();
@@ -333,7 +330,7 @@ var Everscroll = React.createClass({
     return (
       <div ref="root" className={this.props.className} key={this.props.key} onScroll={this._handleScroll}>
         <div ref="topCap">
-          {this.props.reverse ? this.props.backCap : this.props.frontCap}
+          {reverse ? backCap : frontCap}
         </div>
         <div ref="topSpacer" style={{height: topSpacerHeight}} />
         <div key="renderRows" ref="renderRows">
@@ -341,7 +338,7 @@ var Everscroll = React.createClass({
         </div>
         <div ref="bottomSpacer" style={{height: bottomSpacerHeight}} />
         <div ref="bottomCap">
-          {!this.props.reverse ? this.props.backCap : this.props.frontCap}
+          {!reverse ? backCap : frontCap}
         </div>
       </div>
     )
