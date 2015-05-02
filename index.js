@@ -328,7 +328,7 @@ var Everscroll = React.createClass({
     })
 
     return (
-      <div ref="root" className={this.props.className} key={this.props.key} onScroll={this._handleScroll}>
+      <div style={this.props.style} ref="root" className={this.props.className} key={this.props.key} onScroll={this._handleScroll}>
         <div ref="topCap">
           {reverse ? backCap : frontCap}
         </div>
