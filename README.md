@@ -1,3 +1,9 @@
+# DEPRECATED
+
+Please use something like [react-virtualized](https://github.com/bvaughn/react-virtualized) for more efficient and supported features like this library provided
+
+
+
 # react-everscroll
 Performant large lists and infinite scrolling in React.
 
